@@ -23,14 +23,16 @@ func RunContainerInitProcess() error {
 		return fmt.Errorf("Run container get user command error, cmdArray is nil")
 	}
 
-	//setUpMount()
+	setUpMount()
 
+	// 调用 LookPath 可以在系统的 PATH 里面寻找命令的绝对路径
 	path, err := exec.LookPath(cmdArray[0])
 	if err != nil {
 		log.Errorf("Exec loop path error %v", err)
 		return err
 	}
-	log.Infof("Find path %s", path)
+
+	log.Infof("找到了 path %s", path)
 	if err := syscall.Exec(path, cmdArray[0:], os.Environ()); err != nil {
 		log.Errorf(err.Error())
 	}
@@ -58,6 +60,7 @@ func RunContainerInitProcess() error {
 //}
 
 func readUserCommand() []string {
+	// uintptr(3) 就是指 index 为 3 的文件描述符，也就是传递进来的管道的一端
 	pipe := os.NewFile(uintptr(3), "pipe")
 	msg, err := ioutil.ReadAll(pipe)
 	if err != nil {
@@ -74,13 +77,15 @@ Init 挂载点
 func setUpMount() {
 	pwd, err := os.Getwd()
 	if err != nil {
-		log.Errorf("Get current location error %v", err)
+		log.Errorf("获取当前路径错误 %v", err)
 		return
 	}
-	log.Infof("Current location is %s", pwd)
+	log.Infof("当前路径是 %s", pwd)
 
-	syscall.Mount("", "/", "", syscall.MS_PRIVATE|syscall.MS_REC, "")
+	// syscall.Mount("", "/", "", syscall.MS_PRIVATE|syscall.MS_REC, "")
 	pivotRoot(pwd)
+	// see https://github.com/xianlubird/mydocker/issues/41
+	syscall.Mount("", "/", "", syscall.MS_PRIVATE|syscall.MS_REC, "")
 
 	//mount proc
 	defaultMountFlags := syscall.MS_NOEXEC | syscall.MS_NOSUID | syscall.MS_NODEV
@@ -91,7 +96,7 @@ func setUpMount() {
 
 func pivotRoot(root string) error {
 	/**
-	  为了使当前root的老 root 和新 root 不在同一个文件系统下，我们把root重新mount了一次
+	  为了使当前root的老root和新root不在同一个文件系统下，我们把root重新mount了一次
 	  bind mount是把相同的内容换了一个挂载点的挂载方法
 	*/
 	if err := syscall.Mount(root, root, "bind", syscall.MS_BIND|syscall.MS_REC, ""); err != nil {

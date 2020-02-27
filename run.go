@@ -16,6 +16,7 @@ import (
 	发送 init 参数，调用我们写的 init 方法初始化容器的一些资源
 */
 func Run(tty bool, comArray []string, res *subsystems.ResourceConfig) {
+	log.Infoln("创建 Namespace 隔离的容器进程。")
 	parent, writePipe := container.NewParentProcess(tty)
 	if parent == nil {
 		log.Errorf("New parent process error")
@@ -32,9 +33,13 @@ func Run(tty bool, comArray []string, res *subsystems.ResourceConfig) {
 	cgroupManager.Set(res)
 	// 将容器进程加入到各个 subsystem 挂在对应的 cgroup 中
 	cgroupManager.Apply(parent.Process.Pid)
-	// 对容器设置完限制之后，初始化容器
+	// 对容器设置完限制之后，初始化容器（发送用户命令）
 	sendInitCommand(comArray, writePipe)
 	parent.Wait()
+	mntURL := "/root/mnt/"
+	rootURL := "/root/"
+	container.DeleteWorkSpace(rootURL, mntURL)
+	os.Exit(0)
 }
 
 func sendInitCommand(comArray []string, writePipe *os.File) {

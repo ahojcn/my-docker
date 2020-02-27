@@ -35,12 +35,13 @@ var runCommand = cli.Command{
 		},
 	},
 	/*
-		这里是 run 命令执行的真正函数
+		这里是 Run() 命令执行的真正函数
 		1. 判断参数是否包含 command
 		2. 获取用户指定的 command
 		3. 调用 Run() 去准备启动容器
 	*/
 	Action: func(context *cli.Context) error {
+		log.Infoln("解析参数。")
 		if context.Args().Len() < 1 {
 			return fmt.Errorf("Missing container command")
 		}
@@ -86,7 +87,7 @@ var initCommand = cli.Command{
 	Name:  "init",
 	Usage: "Init container process run user's process in container. Do not call it outside",
 	Action: func(context *cli.Context) error {
-		log.Infof("init come on")
+		log.Infof("容器初始化操作。")
 		err := container.RunContainerInitProcess()
 		return err
 	},

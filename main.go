@@ -23,8 +23,9 @@ func main() {
 	// 初始化 logrus 日志配置
 	app.Before = func(context *cli.Context) error {
 		// Log as JSON instead of the default ASCII formatter.
-		log.SetFormatter(&log.JSONFormatter{})
-
+		//log.SetFormatter(&log.JSONFormatter{})  // 使用 json 格式的 log 信息
+		log.Infoln("初始化 logrus 配置。")
+		log.SetFormatter(&log.TextFormatter{}) // 使用 text 格式的 log 信息
 		log.SetOutput(os.Stdout)
 		return nil
 	}
