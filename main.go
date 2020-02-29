@@ -14,6 +14,7 @@ func main() {
 
 	app.Commands = []cli.Command{
 		command.RunCommand,
+		command.InitCommand,
 	}
 
 	err := app.Run(os.Args)

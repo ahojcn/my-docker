@@ -8,7 +8,15 @@ import (
 )
 
 func Run(command string, tty bool) {
-	cmd := exec.Command(command)
+	// cmd := exec.Command(command)
+	/**
+	 * 先执行当前进程的 init 命令，参数为 command
+	 *
+	 * 表示在执行用户的 command 命令以前，在已经做好 namespace 隔离的进程中先执行 init 命令
+	 * 其实就是执行 mount -t proc proc /proc 操作，然后再执行 command
+	 */
+	cmd := exec.Command("/proc/self/exe", "init", command)
+
 	// for kinds of namespace
 	cmd.SysProcAttr = &syscall.SysProcAttr{
 		Cloneflags: syscall.CLONE_NEWUTS | syscall.CLONE_NEWPID | syscall.CLONE_NEWNS | syscall.CLONE_NEWNET | syscall.CLONE_NEWIPC,
