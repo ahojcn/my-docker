@@ -5,7 +5,7 @@
       <paths name="Huaweiyun">
         <serverdata>
           <mappings>
-            <mapping deploy="/home/ahojcn/mydocker" local="$PROJECT_DIR$" web="/" />
+            <mapping deploy="/home/ahojcn/my-docker" local="$PROJECT_DIR$" web="/" />
           </mappings>
         </serverdata>
       </paths>
