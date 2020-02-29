@@ -123,7 +123,7 @@ func DeleteWorkSpace(rootURL string, mntURL string) {
 }
 
 func DeleteMountPoint(rootURL string, mntURL string) {
-	cmd := exec.Command("umount", mntURL)
+	cmd := exec.Command("umount", "-f", mntURL)
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 	if err := cmd.Run(); err != nil {
