@@ -1,13 +1,15 @@
 package command
 
 import (
+	"../cgroups/subsystems"
 	log "github.com/Sirupsen/logrus"
 	"os"
 	"os/exec"
+	"strconv"
 	"syscall"
 )
 
-func Run(command string, tty bool) {
+func Run(command string, tty bool, memory string) {
 	// cmd := exec.Command(command)
 	/**
 	 * 先执行当前进程的 init 命令，参数为 command
@@ -19,7 +21,11 @@ func Run(command string, tty bool) {
 
 	// for kinds of namespace
 	cmd.SysProcAttr = &syscall.SysProcAttr{
-		Cloneflags: syscall.CLONE_NEWUTS | syscall.CLONE_NEWPID | syscall.CLONE_NEWNS | syscall.CLONE_NEWNET | syscall.CLONE_NEWIPC,
+		Cloneflags: syscall.CLONE_NEWUTS |
+			syscall.CLONE_NEWPID |
+			syscall.CLONE_NEWNS |
+			syscall.CLONE_NEWNET |
+			syscall.CLONE_NEWIPC,
 	}
 
 	if tty {
@@ -35,5 +41,10 @@ func Run(command string, tty bool) {
 	if err := cmd.Start(); err != nil {
 		log.Fatalln("Run Start error", err)
 	}
+
+	log.Infof("--- before process pid:%d, memory limit: %s ---", cmd.Process.Pid, memory)
+	subsystems.Set(memory)
+	subsystems.Apply(strconv.Itoa(cmd.Process.Pid))
+
 	cmd.Wait()
 }
