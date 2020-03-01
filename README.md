@@ -12,6 +12,9 @@ tags:
 6-2:
 实现一些 cgroups utils 函数（找到当前进程的 cgroup 的路径）。
 
+6-3:
+实现资源限制。
+
 ---
 
 EOF
