@@ -9,6 +9,9 @@ tags:
 6-1:
 修改 run 命令，加入参数 -m 表示接受 memory 限制。
 
+6-2:
+实现一些 cgroups utils 函数（找到当前进程的 cgroup 的路径）。
+
 ---
 
 EOF
