@@ -17,7 +17,13 @@ func Run(command string, tty bool, cg *cgroups.CgroupManger) {
 	 * 表示在执行用户的 command 命令以前，在已经做好 namespace 隔离的进程中先执行 init 命令
 	 * 其实就是执行 mount -t proc proc /proc 操作，然后再执行 command
 	 */
-	cmd := exec.Command("/proc/self/exe", "init", command)
+	//cmd := exec.Command("/proc/self/exe", "init", command)
+	reader, writer, err := os.Pipe()
+	if err != nil {
+		log.Errorln("os.Pope() error:", err)
+		return
+	}
+	cmd := exec.Command("/proc/self/exe", "init")
 
 	// for kinds of namespace
 	cmd.SysProcAttr = &syscall.SysProcAttr{
@@ -27,6 +33,9 @@ func Run(command string, tty bool, cg *cgroups.CgroupManger) {
 			syscall.CLONE_NEWNET |
 			syscall.CLONE_NEWIPC,
 	}
+
+	cmd.ExtraFiles = []*os.File{reader}
+	sendInitCommand(command, writer)
 
 	if tty {
 		cmd.Stdin = os.Stdin
@@ -52,4 +61,13 @@ func Run(command string, tty bool, cg *cgroups.CgroupManger) {
 	cg.Apply(strconv.Itoa(cmd.Process.Pid))
 
 	cmd.Wait()
+}
+
+func sendInitCommand(command string, writer *os.File) {
+	_, err := writer.Write([]byte(command))
+	if err != nil {
+		log.Errorln("write.Write error:", err)
+		return
+	}
+	writer.Close()
 }

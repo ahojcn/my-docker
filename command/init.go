@@ -2,11 +2,16 @@ package command
 
 import (
 	log "github.com/Sirupsen/logrus"
+	"io/ioutil"
 	"os"
 	"syscall"
 )
 
 func Init(command string) {
+	log.Infoln("read from commandline:", command)
+	command = readFromPipe()
+	log.Infoln("read from pipe:", command)
+
 	defaultMountFlags := syscall.MS_NOEXEC | syscall.MS_NOSUID | syscall.MS_NODEV
 	syscall.Mount("proc", "/proc", "proc", uintptr(defaultMountFlags), "")
 
@@ -30,4 +35,14 @@ func Init(command string) {
 	if err := syscall.Exec(command, []string{command}, os.Environ()); err != nil {
 		log.Fatalln("Init syscall.Exec() error", err)
 	}
+}
+
+func readFromPipe() string {
+	reader := os.NewFile(uintptr(3), "pipe")
+	command, err := ioutil.ReadAll(reader)
+	if err != nil {
+		log.Errorln("reader.Read(buf) error:", err)
+		return ""
+	}
+	return string(command)
 }
