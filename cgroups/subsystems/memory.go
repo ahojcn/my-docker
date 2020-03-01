@@ -4,6 +4,7 @@ import (
 	"fmt"
 	log "github.com/Sirupsen/logrus"
 	"io/ioutil"
+	"os"
 	"path"
 )
 
@@ -41,5 +42,22 @@ func Apply(pid string) error {
 		log.Errorln("err:", err)
 	}
 
+	return nil
+}
+
+/**资源删除
+删除对应的文件夹
+*/
+func Remove() error {
+	absolutePath := ""
+	if absolutePath = FindAbsolutePath("memory"); absolutePath == "" {
+		log.Errorln("absolutePath is empty!")
+		return fmt.Errorf("absolutePath is empty!\n")
+	}
+	if err := os.RemoveAll(absolutePath); err != nil {
+		log.Errorln("remove absolute path error:", err)
+		return fmt.Errorf("remove absolute path error:%v\n", err)
+	}
+	
 	return nil
 }

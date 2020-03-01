@@ -45,6 +45,8 @@ func Run(command string, tty bool, memory string) {
 	log.Infof("--- before process pid:%d, memory limit: %s ---", cmd.Process.Pid, memory)
 	subsystems.Set(memory)
 	subsystems.Apply(strconv.Itoa(cmd.Process.Pid))
+	
+	defer subsystems.Remove()
 
 	cmd.Wait()
 }
