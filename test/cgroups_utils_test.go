@@ -1,7 +1,7 @@
 package main
 
 import (
-	"../cgroups/subsystems"
+	"mydocker/cgroups/subsystems"
 	log "github.com/Sirupsen/logrus"
 	"testing"
 )

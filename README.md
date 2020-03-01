@@ -1,30 +1,24 @@
-branch 6:
+branch 7:
 
-主要实现 memory 限制，在 branch5 基础上。
+在 branch6 的基础上，梳理代码，使其更清晰，也为了方便拓展加入其他的 subsystem 限制。
 
 ---
 
 tags:
 
-6-1:
-修改 run 命令。
-加入参数 -m 表示接受 memory 限制。
+7-1:
+实现。
 
-6-2:
-实现一些 cgroups utils 函数。
-找到当前进程的 cgroup 的路径。
+注意:
 
-6-3:
-实现资源限制。
-memory 的 Set 和 Apply 函数将内存限制写入文件。
+1. 循环引用问题！
+2. 注意 memory.swappiness 的限制
+    memory.swappiness = 0 时候是没有交换分区的
+    
+参考：
+https://segmentfault.com/a/1190000008125116
 
-6-4:
-实现容器资源隔离。
-
-6-5:
-实现资源删除。
-资源删除其实是在进程结束的时候把限制解除，其实就是把对应的文件夹给删除。
-Remove 函数。
+https://segmentfault.com/a/1190000008125359
 
 ---
 

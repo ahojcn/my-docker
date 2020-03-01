@@ -1,9 +1,9 @@
 package main
 
 import (
-	"./command"
 	log "github.com/Sirupsen/logrus"
 	"github.com/urfave/cli"
+	"mydocker/command"
 	"os"
 )
 

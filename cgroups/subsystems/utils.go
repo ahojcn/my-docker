@@ -1,7 +1,6 @@
 package subsystems
 
 import (
-	"../../cgroups"
 	"bufio"
 	log "github.com/Sirupsen/logrus"
 	"io"
@@ -45,7 +44,7 @@ func FindCgroupMountPoint(subsystem string) string {
 func FindAbsolutePath(subsystem string) string {
 	path := FindCgroupMountPoint(subsystem)
 	if path != "" {
-		absolutePath := path + "/" + cgroups.ResourceName
+		absolutePath := path + "/" + ResourceName
 		exist, err := PathExists(absolutePath)
 		if err != nil {
 			log.Fatalln("Path exists error", err)

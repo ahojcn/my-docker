@@ -1,15 +1,15 @@
 package command
 
 import (
-	"../cgroups/subsystems"
 	log "github.com/Sirupsen/logrus"
+	"mydocker/cgroups"
 	"os"
 	"os/exec"
 	"strconv"
 	"syscall"
 )
 
-func Run(command string, tty bool, memory string) {
+func Run(command string, tty bool, cg *cgroups.CgroupManger) {
 	// cmd := exec.Command(command)
 	/**
 	 * 先执行当前进程的 init 命令，参数为 command
@@ -42,11 +42,14 @@ func Run(command string, tty bool, memory string) {
 		log.Fatalln("Run Start error", err)
 	}
 
-	log.Infof("--- before process pid:%d, memory limit: %s ---", cmd.Process.Pid, memory)
-	subsystems.Set(memory)
-	subsystems.Apply(strconv.Itoa(cmd.Process.Pid))
-	
-	defer subsystems.Remove()
+	// 直接设置 memory 限制
+	log.Infof("--- before process pid:%d, memory limit: %s ---", cmd.Process.Pid, cg.SubsystemsIns)
+	//subsystems.Set(memory)
+	//subsystems.Apply(strconv.Itoa(cmd.Process.Pid))
+	//defer subsystems.Remove()
+	cg.Set()
+	defer cg.Destroy()
+	cg.Apply(strconv.Itoa(cmd.Process.Pid))
 
 	cmd.Wait()
 }
