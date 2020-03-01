@@ -27,6 +27,13 @@ func Init(command string) {
 	}
 	*/
 
+	pwd, err := os.Getwd()
+	if err != nil {
+		log.Errorln("get pwd error:", err)
+		return
+	}
+	log.Infoln("current path:", pwd)
+
 	/**
 	exec 函数族
 	syscall.Exec 会先执行参数指定的命令，但是并不创建新的进程，只在当前进程空间内执行

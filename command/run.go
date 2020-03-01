@@ -9,7 +9,7 @@ import (
 	"syscall"
 )
 
-func Run(command string, tty bool, cg *cgroups.CgroupManger) {
+func Run(command string, tty bool, cg *cgroups.CgroupManger, rootPath string) {
 	// cmd := exec.Command(command)
 	/**
 	 * 先执行当前进程的 init 命令，参数为 command
@@ -34,6 +34,13 @@ func Run(command string, tty bool, cg *cgroups.CgroupManger) {
 			syscall.CLONE_NEWIPC,
 	}
 
+	log.Infoln("cmd.Dir:", "/root")
+	// cmd.Dir = "/root"
+	cmd.Dir = rootPath
+	if rootPath == "" {
+		log.Infoln("set cmd.Dir by default: /root/busybox")
+		cmd.Dir = "/root/busybox"
+	}
 	cmd.ExtraFiles = []*os.File{reader}
 	sendInitCommand(command, writer)
 

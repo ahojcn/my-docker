@@ -17,11 +17,16 @@ var RunCommand = cli.Command{
 			Name:  "m",
 			Usage: "limit memory usage",
 		},
+		cli.StringFlag{
+			Name:  "r",
+			Usage: "set root path",
+		},
 	},
 
 	Action: func(c *cli.Context) error {
 		tty := c.Bool("it")
 		memory := c.String("m")
+		rootPath := c.String("r")
 		command := c.Args().Get(0)
 
 		/**
@@ -37,7 +42,7 @@ var RunCommand = cli.Command{
 			cg.SubsystemsIns = append(cg.SubsystemsIns, &subsystems.MemorySubsystem{})
 		}
 
-		Run(command, tty, &cg)
+		Run(command, tty, &cg, rootPath)
 
 		return nil
 	},
