@@ -1,17 +1,13 @@
-branch 13:
+branch 14:
 
-在 branch12 的基础上，一步步实现 volume 操作。
+在 branch13 的基础上，实现保存镜像。
 
-> branch12 中的容器内增删文件都不会保存。
-> 如果用户需要保存则需要 -v 参数把宿主机的目录挂载到容器内。
+> 直接把容器运行时的整个目录保存起来即可。
 
 ---
 
 tags:
-
-13-1:
-实现单个 volume 挂载到容器中。注意 umount 的时候先 umount volume path，再 umount mnt/。
-
+14
 
 ---
 
