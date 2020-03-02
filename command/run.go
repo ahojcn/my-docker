@@ -11,7 +11,7 @@ import (
 	"syscall"
 )
 
-func Run(command string, tty bool, cg *cgroups.CgroupManger, rootPath string, volume string) {
+func Run(command string, tty bool, cg *cgroups.CgroupManger, rootPath string, volumes []string) {
 	// cmd := exec.Command(command)
 	/**
 	 * 先执行当前进程的 init 命令，参数为 command
@@ -40,10 +40,10 @@ func Run(command string, tty bool, cg *cgroups.CgroupManger, rootPath string, vo
 	// cmd.Dir = "/root"
 	newRootPath := getRootPath(rootPath)
 	cmd.Dir = newRootPath + "/busybox"
-	if err := NewWorkDir(newRootPath, volume); err == nil {
+	if err := NewWorkDir(newRootPath, volumes); err == nil {
 		cmd.Dir = newRootPath + "/mnt"
 	}
-	defer ClearWorkDir(newRootPath, volume)
+	defer ClearWorkDir(newRootPath, volumes)
 	//if rootPath == "" {
 	//	log.Infoln("set cmd.Dir by default: /root/busybox")
 	//	cmd.Dir = "/root/busybox"
@@ -146,7 +146,7 @@ func getRootPath(rootPath string) string {
 3. 挂载：将 busybox 和 writeLayer 挂载到 mnt 下。
 */
 // 创建 Init 程序工作目录
-func NewWorkDir(rootPath, volume string) error {
+func NewWorkDir(rootPath string, volumes []string) error {
 	if err := CreateContainerLayer(rootPath); err != nil {
 		return fmt.Errorf("create container layer %s error: %v\n", rootPath, err)
 	}
@@ -157,8 +157,10 @@ func NewWorkDir(rootPath, volume string) error {
 		return fmt.Errorf("set mount point %s error: %v\n", rootPath, err)
 	}
 
-	if err := CreateVolume(rootPath, volume); err != nil {
-		return fmt.Errorf("create volume %s error: %v\n", volume, err)
+	for _, volume := range volumes {
+		if err := CreateVolume(rootPath, volume); err != nil {
+			return fmt.Errorf("create volume %s error: %v\n", volume, err)
+		}
 	}
 
 	return nil
@@ -203,9 +205,10 @@ func SetMountPoint(rootPath string) error {
 2. rmdir /home/ahojcn/mnt
 3. rmdir /home/ahojcn/writeLayer
 */
-func ClearWorkDir(rootPath, volume string) {
-	ClearVolume(rootPath, volume)
-
+func ClearWorkDir(rootPath string, volumes []string) {
+	for _, volume := range volumes {
+		ClearVolume(rootPath, volume)
+	}
 
 	ClearMountPoint(rootPath)
 	ClearWriteLayer(rootPath)
