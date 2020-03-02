@@ -25,6 +25,10 @@ var RunCommand = cli.Command{
 			Name:  "v",
 			Usage: "enable volume",
 		},
+		cli.BoolFlag{
+			Name:  "d",
+			Usage: "enable detach",
+		},
 	},
 
 	Action: func(c *cli.Context) error {
@@ -32,6 +36,7 @@ var RunCommand = cli.Command{
 		memory := c.String("m")
 		rootPath := c.String("r")
 		volumes := c.StringSlice("v")
+		detach := c.Bool("d")
 		command := c.Args().Get(0)
 
 		/**
@@ -45,6 +50,10 @@ var RunCommand = cli.Command{
 		}
 		if memory != "" {
 			cg.SubsystemsIns = append(cg.SubsystemsIns, &subsystems.MemorySubsystem{})
+		}
+
+		if detach { // 如果有参数 d，就把 tty 设置为 false 后台运行
+			tty = false
 		}
 
 		Run(command, tty, &cg, rootPath, volumes)

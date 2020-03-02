@@ -74,7 +74,11 @@ func Run(command string, tty bool, cg *cgroups.CgroupManger, rootPath string, vo
 	defer cg.Destroy()
 	cg.Apply(strconv.Itoa(cmd.Process.Pid))
 
-	cmd.Wait()
+	// false 表明父进程(Run程序)无须等待子进程(Init程序，Init进程后续会被用户程序覆盖)
+	// tty == true 才等待用户程序运行结束后退出，不然就直接退出
+	if tty {
+		cmd.Wait()
+	}
 }
 
 func sendInitCommand(command string, writer *os.File) {
