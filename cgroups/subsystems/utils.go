@@ -33,6 +33,7 @@ func FindCgroupMountPoint(subsystem string) string {
 
 		parts := strings.Split(string(line), " ")
 		if strings.Contains(parts[len(parts)-1], subsystem) {
+			//log.Warnln("parts[4]:", parts[4])
 			return parts[4]
 		}
 	}

@@ -17,6 +17,13 @@ func main() {
 		command.InitCommand,
 	}
 
+	app.Before = func(context *cli.Context) error {
+		// Log as JSON instead of the default ASCII formatter.
+		log.SetFormatter(&log.JSONFormatter{})
+		log.SetOutput(os.Stdout)
+		return nil
+	}
+
 	err := app.Run(os.Args)
 	if err != nil {
 		log.Fatalln("Run() error", err)

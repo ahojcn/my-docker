@@ -26,7 +26,7 @@ func (s *MemorySubsystem) Set(res *ResourceConfig) error {
 			log.Errorln("absolutePath is empty!")
 			return fmt.Errorf("absolutePath is empty!\n")
 		}
-		log.Infof("Apply absolute path:%s, memory.limit_in_bytes path:%s\n", absolutePath, path.Join(absolutePath, "memory.limit_in_bytes"))
+		log.Infof("Set absolute path:%s, memory.limit_in_bytes path:%s\n", absolutePath, path.Join(absolutePath, "memory.limit_in_bytes"))
 		if err := ioutil.WriteFile(path.Join(absolutePath, "memory.limit_in_bytes"), []byte(content), 0644); err != nil {
 			log.Errorln("write content:" + content + "error!")
 			return fmt.Errorf("absolutePath is empty!\n")
