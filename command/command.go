@@ -21,12 +21,17 @@ var RunCommand = cli.Command{
 			Name:  "r",
 			Usage: "set root path",
 		},
+		cli.StringFlag{
+			Name:  "v",
+			Usage: "enable volume",
+		},
 	},
 
 	Action: func(c *cli.Context) error {
 		tty := c.Bool("it")
 		memory := c.String("m")
 		rootPath := c.String("r")
+		volume := c.String("v")
 		command := c.Args().Get(0)
 
 		/**
@@ -42,7 +47,7 @@ var RunCommand = cli.Command{
 			cg.SubsystemsIns = append(cg.SubsystemsIns, &subsystems.MemorySubsystem{})
 		}
 
-		Run(command, tty, &cg, rootPath)
+		Run(command, tty, &cg, rootPath, volume)
 
 		return nil
 	},

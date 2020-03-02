@@ -7,10 +7,11 @@ import (
 	"os"
 	"os/exec"
 	"strconv"
+	"strings"
 	"syscall"
 )
 
-func Run(command string, tty bool, cg *cgroups.CgroupManger, rootPath string) {
+func Run(command string, tty bool, cg *cgroups.CgroupManger, rootPath string, volume string) {
 	// cmd := exec.Command(command)
 	/**
 	 * 先执行当前进程的 init 命令，参数为 command
@@ -39,10 +40,10 @@ func Run(command string, tty bool, cg *cgroups.CgroupManger, rootPath string) {
 	// cmd.Dir = "/root"
 	newRootPath := getRootPath(rootPath)
 	cmd.Dir = newRootPath + "/busybox"
-	if err := NewWorkDir(newRootPath); err == nil {
+	if err := NewWorkDir(newRootPath, volume); err == nil {
 		cmd.Dir = newRootPath + "/mnt"
 	}
-	defer ClearWorkDir(newRootPath)
+	defer ClearWorkDir(newRootPath, volume)
 	//if rootPath == "" {
 	//	log.Infoln("set cmd.Dir by default: /root/busybox")
 	//	cmd.Dir = "/root/busybox"
@@ -105,7 +106,7 @@ func PathExists(path string) (bool, error) {
 	此时程序会解压 busybox.tar 到 /home/ahojcn/busybox 并把 /home/ahojcn/busybox 设置为执行 init 程序的工作目录
 */
 const (
-	DEFAULTPATH = "/home/ahojcn"
+	DEFAULTPATH = "/home/ahojcn/test-mydocker/"
 )
 
 func getRootPath(rootPath string) string {
@@ -145,7 +146,7 @@ func getRootPath(rootPath string) string {
 3. 挂载：将 busybox 和 writeLayer 挂载到 mnt 下。
 */
 // 创建 Init 程序工作目录
-func NewWorkDir(rootPath string) error {
+func NewWorkDir(rootPath, volume string) error {
 	if err := CreateContainerLayer(rootPath); err != nil {
 		return fmt.Errorf("create container layer %s error: %v\n", rootPath, err)
 	}
@@ -154,6 +155,10 @@ func NewWorkDir(rootPath string) error {
 	}
 	if err := SetMountPoint(rootPath); err != nil {
 		return fmt.Errorf("set mount point %s error: %v\n", rootPath, err)
+	}
+
+	if err := CreateVolume(rootPath, volume); err != nil {
+		return fmt.Errorf("create volume %s error: %v\n", volume, err)
 	}
 
 	return nil
@@ -198,7 +203,10 @@ func SetMountPoint(rootPath string) error {
 2. rmdir /home/ahojcn/mnt
 3. rmdir /home/ahojcn/writeLayer
 */
-func ClearWorkDir(rootPath string) {
+func ClearWorkDir(rootPath, volume string) {
+	ClearVolume(rootPath, volume)
+
+
 	ClearMountPoint(rootPath)
 	ClearWriteLayer(rootPath)
 }
@@ -217,5 +225,51 @@ func ClearWriteLayer(rootPath string) {
 	writeLayer := rootPath + "/writeLayer"
 	if err := os.RemoveAll(writeLayer); err != nil {
 		log.Errorf("remove %s error: %v\n", writeLayer, err)
+	}
+}
+
+/**
+处理 volume 的添加和删除方法
+*/
+// 增加 volume 并且 mount
+func CreateVolume(rootPath, volume string) error {
+	if volume != "" {
+		containerMntPath := rootPath + "/mnt"
+		hostPath := strings.Split(volume, ":")[0]
+		exist, _ := PathExists(hostPath)
+		if !exist {
+			if err := os.Mkdir(hostPath, 0777); err != nil {
+				log.Errorf("mkdir %s error: %v\n", hostPath, err)
+				return fmt.Errorf("mkdir %s error: %v", hostPath, err)
+			}
+		}
+		mountPath := strings.Split(volume, ":")[1]
+		containerPath := containerMntPath + mountPath
+		if err := os.Mkdir(containerPath, 0777); err != nil {
+			log.Errorf("mkdir %s error: %v", containerPath, err)
+			return fmt.Errorf("mkdir %s error: %v\n", containerPath, err)
+		}
+		dirs := "dirs=" + hostPath
+		if _, err := exec.Command("mount", "-t", "aufs", "-o", dirs, "none", containerPath).CombinedOutput(); err != nil {
+			log.Errorf("mount -t aufs -o %s none %s error: %v\n", dirs, containerPath, err)
+			return fmt.Errorf("mount -t aufs -o %s none %s error: %v", dirs, containerPath, err)
+		}
+	}
+
+	return nil
+}
+
+// 删除 volume
+func ClearVolume(rootPath, volume string) {
+	if volume != "" {
+		containerMntPath := rootPath + "/mnt"
+		mountPath := strings.Split(volume, ":")[1]
+		containerPath := containerMntPath + mountPath
+		if _, err := exec.Command("umount", "-f", containerPath).CombinedOutput(); err != nil {
+			log.Errorf("umount -f %s error: %v\n", containerPath, err)
+		}
+		if err := os.RemoveAll(containerPath); err != nil {
+			log.Errorf("remove %s error: %v\n", containerPath, err)
+		}
 	}
 }
