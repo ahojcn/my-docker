@@ -1,17 +1,24 @@
-branch 11:
+branch 12:
 
-在 branch8 的基础上，一步步实现使用 busybox 创建容器。
+在 branch11 的基础上，一步步实现使用AUFS包装busybox。
+
+> branch 11 的存在问题：
+> 利用 busybox 创建的容器, 创建文件夹并且创建文件。
+> 退出容器后, 查看宿主机的内容, 返现内容在宿主机中也存在。
+> 这样会有一个问题, 其实 busybox 就是容器的镜像层, 如果多个容器共享该镜像层, 那就会造成容器之间互相看到对方文件, 并且文件覆盖等等问题。
+> branch12 就是利用 AUFS 解决此问题
+>
+> https://www.jianshu.com/p/ecbdcc98db76
 
 ---
 
 tags:
 
-11-1:
-实现改变 init 程序执行路径。
-给 cmd 加入一些参数， `cmd.Dir = "/root"`，在执行用户程序的时候可以设置该程序在哪个目录下执行。
+12:
 
-11-2:
-实现用 busybox 作为容器的跟目录。
+1. 根据 busybox 镜像生成容器，其实就是解压 busybox.tar 生成 rootPath/busybox。
+2. 创建挂载点、可写层，并将 writeLayer 和 busybox 挂载到 mnt 下。
+3. 当退出时候执行 umount mnt/ 并删除 writeLayer。
 
 ---
 
