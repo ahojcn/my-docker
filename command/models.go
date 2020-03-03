@@ -1,7 +1,5 @@
 package command
 
-import "io/ioutil"
-
 type ContainerInfo struct {
 	Pid        string `json:"pid"`
 	Id         string `json:"id"`
@@ -19,12 +17,3 @@ var (
 	INFOLOCATION string = "/var/run/mydocker/%s"
 	CONFIGNAME   string = "config.json"
 )
-
-func writeUUID(uuid string) {
-	ioutil.WriteFile("uuid.txt", []byte(uuid), 0644)
-}
-
-func readUUID() string {
-	data, _ := ioutil.ReadFile("uuid.txt")
-	return string(data)
-}

@@ -11,7 +11,7 @@ import (
 	"syscall"
 )
 
-func Run(command string, tty bool, cg *cgroups.CgroupManger, rootPath string, volumes []string) {
+func Run(command string, tty bool, cg *cgroups.CgroupManger, rootPath string, volumes []string, containerName string) {
 	// cmd := exec.Command(command)
 	/**
 	 * 先执行当前进程的 init 命令，参数为 command
@@ -74,10 +74,18 @@ func Run(command string, tty bool, cg *cgroups.CgroupManger, rootPath string, vo
 	defer cg.Destroy()
 	cg.Apply(strconv.Itoa(cmd.Process.Pid))
 
+	id := ContainerUUID()
+	if containerName == "" {
+		containerName = id
+	}
+	RecordContainerInfo(strconv.Itoa(cmd.Process.Pid), containerName, id, command)
+
 	// false 表明父进程(Run程序)无须等待子进程(Init程序，Init进程后续会被用户程序覆盖)
 	// tty == true 才等待用户程序运行结束后退出，不然就直接退出
 	if tty {
 		cmd.Wait()
+		// -it 交互式的时候退出容器时删除容器 metadata
+		DeleteContainerInfo(containerName)
 	}
 }
 
