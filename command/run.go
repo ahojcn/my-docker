@@ -11,7 +11,7 @@ import (
 	"syscall"
 )
 
-func Run(command string, tty bool, cg *cgroups.CgroupManger, rootPath string, volumes []string, containerName string) {
+func Run(command string, tty bool, cg *cgroups.CgroupManger, rootPath string, volumes []string, containerName, imageName string) {
 	reader, writer, err := os.Pipe()
 	if err != nil {
 		log.Errorln("os.Pope() error:", err)
@@ -30,13 +30,6 @@ func Run(command string, tty bool, cg *cgroups.CgroupManger, rootPath string, vo
 		Cloneflags: syscall.CLONE_NEWUTS | syscall.CLONE_NEWPID | syscall.CLONE_NEWNS | syscall.CLONE_NEWNET | syscall.CLONE_NEWIPC,
 	}
 
-	newRootPath := getRootPath(rootPath)
-	cmd.Dir = newRootPath + "/busybox"
-	if err := NewWorkDir(newRootPath,containerName, volumes); err == nil {
-		cmd.Dir = newRootPath + "/mnt/" + containerName
-	}
-	defer ClearWorkDir(newRootPath, containerName, volumes)
-
 	cmd.ExtraFiles = []*os.File{reader}
 	sendInitCommand(command, writer)
 
@@ -44,6 +37,18 @@ func Run(command string, tty bool, cg *cgroups.CgroupManger, rootPath string, vo
 	if containerName == "" {
 		containerName = id
 	}
+
+	newRootPath := getRootPath(rootPath, imageName)
+	//cmd.Dir = newRootPath + "/busybox"
+
+	if err := NewWorkDir(newRootPath, containerName, imageName, volumes); err == nil {
+		cmd.Dir = newRootPath + "/mnt/" + containerName
+	} else {
+		log.Errorln("new work dir error", err)
+		return
+	}
+	defer ClearWorkDir(newRootPath, containerName, volumes)
+
 	if tty {
 		cmd.Stdin = os.Stdin
 		cmd.Stdout = os.Stdout
@@ -107,20 +112,20 @@ const (
 	DEFAULTPATH = "/home/ahojcn/test-mydocker/"
 )
 
-func getRootPath(rootPath string) string {
+func getRootPath(rootPath, imageName string) string {
 	log.Infoln("root path:", rootPath)
 	defaultPath := DEFAULTPATH
 	if rootPath == "" {
 		log.Infof("root path is empty, set cmd.Dir by default: %sbusybox", defaultPath)
 		rootPath = defaultPath
 	}
-	imageTar := rootPath + "/busybox.tar"
+	imageTar := rootPath + "/" + imageName + ".tar"
 	exist, _ := PathExists(imageTar)
 	if !exist {
 		log.Warnf("%s does not exist, set cmd.Dir by default: %sbusybox", imageTar, defaultPath)
 		return defaultPath
 	}
-	imagePath := rootPath + "/busybox"
+	imagePath := rootPath + "/" + imageName
 	//exist, _ = PathExists(imageTar)
 	//if exist {
 	//	os.RemoveAll(imagePath)
@@ -144,14 +149,14 @@ func getRootPath(rootPath string) string {
 3. 挂载：将 busybox 和 writeLayer 挂载到 mnt 下。
 */
 // 创建 Init 程序工作目录
-func NewWorkDir(rootPath, containerName string, volumes []string) error {
+func NewWorkDir(rootPath, containerName, imageName string, volumes []string) error {
 	if err := CreateContainerLayer(rootPath, containerName); err != nil {
 		return fmt.Errorf("create container layer %s error: %v", rootPath, err)
 	}
 	if err := CreateMntPoint(rootPath, containerName); err != nil {
 		return fmt.Errorf("create mnt point %s error: %v", rootPath, err)
 	}
-	if err := SetMountPoint(rootPath, containerName); err != nil {
+	if err := SetMountPoint(rootPath, containerName, imageName); err != nil {
 		return fmt.Errorf("set mount point %s error: %v", rootPath, err)
 	}
 
@@ -185,8 +190,8 @@ func CreateMntPoint(rootPath, containerName string) error {
 }
 
 // 挂载（比如：mount -t aufs -o dirs=/home/ahojcn/writeLayer:/home/ahojcn/busybox none /home/ahojcn/mnt）
-func SetMountPoint(rootPath, containerName string) error {
-	dirs := "dirs=" + rootPath + "/writeLayer/" + containerName + ":" + rootPath + "/busybox"
+func SetMountPoint(rootPath, containerName, imageName string) error {
+	dirs := "dirs=" + rootPath + "/writeLayer/" + containerName + ":" + rootPath + "/" + imageName
 	mnt := rootPath + "/mnt/" + containerName
 	if _, err := exec.Command("mount", "-t", "aufs", "-o", dirs, "none", mnt).CombinedOutput(); err != nil {
 		log.Errorf("mount -t aufs -o %s none %s, err:%v", dirs, mnt, err)

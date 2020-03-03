@@ -44,7 +44,9 @@ var RunCommand = cli.Command{
 		volumes := c.StringSlice("v")
 		detach := c.Bool("d")
 		containerName := c.String("name")
-		command := c.Args().Get(0)
+
+		imageName := c.Args().Get(0)
+		command := c.Args().Get(1)
 
 		/**
 		如果用户设置了该参数，此时需要把该限制对应的 subsystem 加入到 CgroupManager 中的属性 SubsystemIns 数组中对其限制
@@ -63,7 +65,7 @@ var RunCommand = cli.Command{
 			tty = false
 		}
 
-		Run(command, tty, &cg, rootPath, volumes, containerName)
+		Run(command, tty, &cg, rootPath, volumes, containerName, imageName)
 
 		return nil
 	},
