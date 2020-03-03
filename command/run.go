@@ -47,7 +47,7 @@ func Run(command string, tty bool, cg *cgroups.CgroupManger, rootPath string, vo
 		log.Errorln("new work dir error", err)
 		return
 	}
-	defer ClearWorkDir(newRootPath, containerName, volumes)
+	// defer ClearWorkDir(newRootPath, containerName, volumes)
 
 	if tty {
 		cmd.Stdin = os.Stdin
@@ -69,14 +69,16 @@ func Run(command string, tty bool, cg *cgroups.CgroupManger, rootPath string, vo
 	log.Infof("before process pid:%d, memory limit: %s", cmd.Process.Pid, cg.SubsystemsIns)
 
 	cg.Set()
-	defer cg.Destroy()
+	//defer cg.Destroy()
 	cg.Apply(strconv.Itoa(cmd.Process.Pid))
 
-	RecordContainerInfo(strconv.Itoa(cmd.Process.Pid), containerName, id, command)
+	RecordContainerInfo(strconv.Itoa(cmd.Process.Pid), containerName, id, command, volumes, newRootPath)
 
 	if tty {
 		cmd.Wait()
 		DeleteContainerInfo(containerName)
+		ClearWorkDir(newRootPath, containerName, volumes)
+		cg.Destroy()
 	}
 }
 

@@ -30,7 +30,7 @@ func ContainerUUID() string {
 }
 
 // 保存容器 metadata，保存到 INFOLOCATION/uuid/config.json下
-func RecordContainerInfo(pid, name, id, command string) error {
+func RecordContainerInfo(pid, name, id, command string, volumes []string, newRootPath string) error {
 	containerInfo := &ContainerInfo{
 		Pid:        pid,
 		Id:         id,
@@ -38,6 +38,8 @@ func RecordContainerInfo(pid, name, id, command string) error {
 		Command:    command,
 		CreateTime: time.Now().Format("2006-01-02 15:04:05"),
 		Status:     RUNNING,
+		Volumes:    volumes,
+		RootPath:   newRootPath,
 	}
 	jsonInfo, _ := json.Marshal(containerInfo)
 	log.Infoln("jsonInfo:", string(jsonInfo))

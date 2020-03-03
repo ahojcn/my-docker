@@ -30,4 +30,8 @@ func Stop(containerName string) {
 	containerInfo.Pid = ""
 	log.Infoln(containerName, "已停止")
 	UpdateContainerInfo(containerInfo)
+
+	log.Infoln("rootPath:", containerInfo.RootPath)
+	log.Infoln(containerInfo.Volumes)
+	ClearWorkDir(containerInfo.RootPath, containerName, containerInfo.Volumes)
 }

@@ -7,6 +7,8 @@ type ContainerInfo struct {
 	Command    string `json:"command"`
 	CreateTime string `json:"createTime"`
 	Status     string `json:"status"`
+	Volumes    []string `json:"volumes"`
+	RootPath   string `json:"rootPaths"`
 }
 
 var (
