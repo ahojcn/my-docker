@@ -70,7 +70,7 @@ func ShowAllContainers() {
 	files, err := ioutil.ReadDir(CONTAINS)
 	w := tabwriter.NewWriter(os.Stdout, 12, 1, 3, ' ', 0)
 	fmt.Fprint(w, "ID\tNAME\tPID\tSTATUS\tCOMMAND\tCREATED\n")
-	
+
 	if err != nil {
 		log.Errorln("ReadDir error :", err)
 		return
@@ -137,6 +137,15 @@ func UpdateContainerInfo(containerInfo *ContainerInfo) error {
 	file := location + "/" + CONFIGNAME
 	if err := ioutil.WriteFile(file, []byte(jsonInfo), 0622); err != nil {
 		return fmt.Errorf("write %s to %s error:%v\n", jsonInfo, file, err)
+	}
+	return nil
+}
+
+// 删除容器信息
+func RemoveContainerInfo(containerInfo *ContainerInfo) error {
+	location := fmt.Sprintf(INFOLOCATION, containerInfo.Name)
+	if err := os.RemoveAll(location); err != nil {
+		return fmt.Errorf("os.RemoveAll(%s) %v\n", location, err)
 	}
 	return nil
 }

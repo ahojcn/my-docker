@@ -120,6 +120,16 @@ var StopCommand = cli.Command{
 	},
 }
 
+var RemoveCommand = cli.Command{
+	Name: "rm",
+	Usage: "remove a stopped container",
+	Action: func(c *cli.Context) error {
+		containerName := c.Args().Get(0)
+		Remove(containerName)
+		return nil
+	},
+}
+
 var InitCommand = cli.Command{
 	Name: "init",
 	Flags: []cli.Flag{
