@@ -68,6 +68,9 @@ func GetContainerInfo(name string) (*ContainerInfo, error) {
 // 获取所有容器 metadata
 func ShowAllContainers() {
 	files, err := ioutil.ReadDir(CONTAINS)
+	w := tabwriter.NewWriter(os.Stdout, 12, 1, 3, ' ', 0)
+	fmt.Fprint(w, "ID\tNAME\tPID\tSTATUS\tCOMMAND\tCREATED\n")
+	
 	if err != nil {
 		log.Errorln("ReadDir error :", err)
 		return
@@ -81,8 +84,6 @@ func ShowAllContainers() {
 		}
 		containers = append(containers, container)
 	}
-	w := tabwriter.NewWriter(os.Stdout, 12, 1, 3, ' ', 0)
-	fmt.Fprint(w, "ID\tNAME\tPID\tSTATUS\tCOMMAND\tCREATED\n")
 	for _, item := range containers {
 		fmt.Fprintf(w, "%s\t%s\t%s\t%s\t%s\t%s\n",
 			item.Id,
@@ -133,7 +134,7 @@ func UpdateContainerInfo(containerInfo *ContainerInfo) error {
 	jsonInfo, _ := json.Marshal(containerInfo)
 	//log.Printf("jsonInfo:%s\n", string(jsonInfo))
 	location := fmt.Sprintf(INFOLOCATION, containerInfo.Name)
-	file 	 := location + "/" + CONFIGNAME
+	file := location + "/" + CONFIGNAME
 	if err := ioutil.WriteFile(file, []byte(jsonInfo), 0622); err != nil {
 		return fmt.Errorf("write %s to %s error:%v\n", jsonInfo, file, err)
 	}
