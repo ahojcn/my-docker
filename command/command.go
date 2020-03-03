@@ -84,6 +84,15 @@ var ListCommand = cli.Command{
 	},
 }
 
+var LogCommand = cli.Command{
+	Name: "logs",
+	Action: func(c *cli.Context) error {
+		containerName := c.Args().Get(0)
+		Logs(containerName)
+		return nil
+	},
+}
+
 var InitCommand = cli.Command{
 	Name: "init",
 	Flags: []cli.Flag{

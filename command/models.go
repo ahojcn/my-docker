@@ -10,10 +10,11 @@ type ContainerInfo struct {
 }
 
 var (
-	RUNNING      string = "running"
-	STOP         string = "STOP"
-	EXIT         string = "exited"
-	CONTAINS     string = "/var/run/mydocker"
-	INFOLOCATION string = "/var/run/mydocker/%s"
-	CONFIGNAME   string = "config.json"
+	RUNNING       string = "running"
+	STOP          string = "STOP"
+	EXIT          string = "exited"
+	CONTAINS      string = "/var/run/mydocker"
+	INFOLOCATION  string = "/var/run/mydocker/%s"
+	CONFIGNAME    string = "config.json"
+	CONTAINERLOGS string = "container.log"
 )

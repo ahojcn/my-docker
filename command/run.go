@@ -12,14 +12,12 @@ import (
 )
 
 func Run(command string, tty bool, cg *cgroups.CgroupManger, rootPath string, volumes []string, containerName string) {
-	// cmd := exec.Command(command)
 	/**
 	 * 先执行当前进程的 init 命令，参数为 command
 	 *
 	 * 表示在执行用户的 command 命令以前，在已经做好 namespace 隔离的进程中先执行 init 命令
 	 * 其实就是执行 mount -t proc proc /proc 操作，然后再执行 command
 	 */
-	//cmd := exec.Command("/proc/self/exe", "init", command)
 	reader, writer, err := os.Pipe()
 	if err != nil {
 		log.Errorln("os.Pope() error:", err)
@@ -36,25 +34,31 @@ func Run(command string, tty bool, cg *cgroups.CgroupManger, rootPath string, vo
 			syscall.CLONE_NEWIPC,
 	}
 
-	// log.Infoln("cmd.Dir:", "/root")
-	// cmd.Dir = "/root"
 	newRootPath := getRootPath(rootPath)
 	cmd.Dir = newRootPath + "/busybox"
 	if err := NewWorkDir(newRootPath, volumes); err == nil {
 		cmd.Dir = newRootPath + "/mnt"
 	}
 	defer ClearWorkDir(newRootPath, volumes)
-	//if rootPath == "" {
-	//	log.Infoln("set cmd.Dir by default: /root/busybox")
-	//	cmd.Dir = "/root/busybox"
-	//}
+
 	cmd.ExtraFiles = []*os.File{reader}
 	sendInitCommand(command, writer)
 
+	id := ContainerUUID()
+	if containerName == "" {
+		containerName = id
+	}
 	if tty {
 		cmd.Stdin = os.Stdin
 		cmd.Stdout = os.Stdout
 		cmd.Stderr = os.Stderr
+	} else {
+		logFile, err := GetLogFile(containerName)
+		if err != nil {
+			log.Errorln("get log file error:", err)
+			return
+		}
+		cmd.Stdout = logFile
 	}
 
 	/**
@@ -67,24 +71,15 @@ func Run(command string, tty bool, cg *cgroups.CgroupManger, rootPath string, vo
 
 	// 直接设置 memory 限制
 	log.Infof("--- before process pid:%d, memory limit: %s ---", cmd.Process.Pid, cg.SubsystemsIns)
-	//subsystems.Set(memory)
-	//subsystems.Apply(strconv.Itoa(cmd.Process.Pid))
-	//defer subsystems.Remove()
+
 	cg.Set()
 	defer cg.Destroy()
 	cg.Apply(strconv.Itoa(cmd.Process.Pid))
 
-	id := ContainerUUID()
-	if containerName == "" {
-		containerName = id
-	}
 	RecordContainerInfo(strconv.Itoa(cmd.Process.Pid), containerName, id, command)
 
-	// false 表明父进程(Run程序)无须等待子进程(Init程序，Init进程后续会被用户程序覆盖)
-	// tty == true 才等待用户程序运行结束后退出，不然就直接退出
 	if tty {
 		cmd.Wait()
-		// -it 交互式的时候退出容器时删除容器 metadata
 		DeleteContainerInfo(containerName)
 	}
 }
