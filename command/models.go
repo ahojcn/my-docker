@@ -11,7 +11,7 @@ type ContainerInfo struct {
 
 var (
 	RUNNING       string = "running"
-	STOP          string = "STOP"
+	STOP          string = "stopped"
 	EXIT          string = "exited"
 	CONTAINS      string = "/var/run/mydocker"
 	INFOLOCATION  string = "/var/run/mydocker/%s"

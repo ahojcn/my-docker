@@ -69,7 +69,7 @@ func GetContainerInfo(name string) (*ContainerInfo, error) {
 func ShowAllContainers() {
 	files, err := ioutil.ReadDir(CONTAINS)
 	if err != nil {
-		log.Errorln("read Dir error :", err)
+		log.Errorln("ReadDir error :", err)
 		return
 	}
 	var containers []*ContainerInfo
@@ -126,4 +126,16 @@ func ReadLogs(containerName string) string {
 	logFile := path + "/" + CONTAINERLOGS
 	data, _ := ioutil.ReadFile(logFile)
 	return string(data)
+}
+
+// 更新容器 metadata
+func UpdateContainerInfo(containerInfo *ContainerInfo) error {
+	jsonInfo, _ := json.Marshal(containerInfo)
+	//log.Printf("jsonInfo:%s\n", string(jsonInfo))
+	location := fmt.Sprintf(INFOLOCATION, containerInfo.Name)
+	file 	 := location + "/" + CONFIGNAME
+	if err := ioutil.WriteFile(file, []byte(jsonInfo), 0622); err != nil {
+		return fmt.Errorf("write %s to %s error:%v\n", jsonInfo, file, err)
+	}
+	return nil
 }

@@ -22,6 +22,6 @@ func Exec(containerName, command string) {
 	cmd.Stderr = os.Stderr
 
 	if err := cmd.Run(); err != nil {
-		log.Errorf("exec container %s error %v\n", containerName, err)
+		log.Errorf("exec container %s error %v", containerName, err)
 	}
 }
