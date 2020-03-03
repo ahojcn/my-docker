@@ -1,9 +1,11 @@
 package command
 
 import (
+	log "github.com/Sirupsen/logrus"
 	"github.com/urfave/cli"
 	"mydocker/cgroups"
 	"mydocker/cgroups/subsystems"
+	"os"
 )
 
 var RunCommand = cli.Command{
@@ -89,6 +91,21 @@ var LogCommand = cli.Command{
 	Action: func(c *cli.Context) error {
 		containerName := c.Args().Get(0)
 		Logs(containerName)
+		return nil
+	},
+}
+
+var ExecCommand = cli.Command{
+	Name: "exec",
+	Action: func(c *cli.Context) error {
+		if os.Getenv("mydocker_pid") != "" {
+			log.Infoln("pid callback pid:", os.Getgid())
+			return nil
+		}
+		containerName := c.Args().Get(0)
+		command := c.Args().Get(1)
+		log.Printf("container name : %s, command: %s", containerName, command)
+		Exec(containerName, command)
 		return nil
 	},
 }

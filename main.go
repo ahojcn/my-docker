@@ -4,6 +4,7 @@ import (
 	log "github.com/Sirupsen/logrus"
 	"github.com/urfave/cli"
 	"mydocker/command"
+	_ "mydocker/nsenter"
 	"os"
 )
 
@@ -18,6 +19,7 @@ func main() {
 		command.CommitCommand,
 		command.ListCommand,
 		command.LogCommand,
+		command.ExecCommand,
 	}
 
 	app.Before = func(context *cli.Context) error {

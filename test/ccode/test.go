@@ -1,18 +1,4 @@
-package main
-
-///*
-//#include <stdio.h>
-//__attribute__((constructor)) void before_main() {
-//	printf("before main\n");
-//}
-//*/
-//import "C"
-//
-//import "log"
-//
-//func main() {
-//	log.Println("hello world!")
-//}
+package ccode
 
 /*
 #include <errno.h>
@@ -21,9 +7,11 @@ package main
 #include <stdlib.h>
 #include <string.h>
 #include <fcntl.h>
-void test() {
+
+__attribute__((constructor)) void enter_namespace(void) {
 	char *mydocker_pid;
 	mydocker_pid = getenv("mydocker_pid");
+	fprintf(stdout, "c code mydocker_pid: %s\n", mydocker_pid);
 	int i;
 	char nspath[1024];
 	char *namespaces[] = { "ipc", "uts", "net", "pid", "mnt" };
@@ -43,7 +31,3 @@ void test() {
 }
 */
 import "C"
-
-func main() {
-	C.test()
-}

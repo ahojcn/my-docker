@@ -25,7 +25,7 @@ func readUUID() string {
 func ContainerUUID() string {
 	str := time.Now().UnixNano()
 	containerId := fmt.Sprintf("%d%d", str, int(math.Abs(float64(rand.Intn(10)))))
-	log.Infoln("containerId: %s\n", containerId)
+	log.Infoln("containerId:", containerId)
 	return containerId
 }
 
