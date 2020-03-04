@@ -2,6 +2,7 @@ package command
 
 import (
 	log "github.com/Sirupsen/logrus"
+	"mydocker/container"
 )
 
 func Remove(containerName string)  {
@@ -10,7 +11,7 @@ func Remove(containerName string)  {
 		log.Errorf("GetContainerInfo error:%v", err)
 		return
 	}
-	if containerInfo.Status != STOP {
+	if containerInfo.Status != container.STOP {
 		log.Errorf("Could not remove not stopped container!")
 		return
 	}

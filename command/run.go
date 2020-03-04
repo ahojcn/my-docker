@@ -4,6 +4,8 @@ import (
 	"fmt"
 	log "github.com/Sirupsen/logrus"
 	"mydocker/cgroups"
+	"mydocker/container"
+	"mydocker/network"
 	"os"
 	"os/exec"
 	"strconv"
@@ -11,7 +13,7 @@ import (
 	"syscall"
 )
 
-func Run(command string, tty bool, cg *cgroups.CgroupManger, rootPath string, volumes []string, containerName, imageName string) {
+func Run(command string, tty bool, cg *cgroups.CgroupManger, rootPath string, volumes []string, containerName, imageName string, envSlice []string, nw string, portMapping []string) {
 	reader, writer, err := os.Pipe()
 	if err != nil {
 		log.Errorln("os.Pope() error:", err)
@@ -25,6 +27,7 @@ func Run(command string, tty bool, cg *cgroups.CgroupManger, rootPath string, vo
 		return
 	}
 	cmd := exec.Command(initCmd, "init")
+	cmd.Env = append(os.Environ(), envSlice...)
 
 	cmd.SysProcAttr = &syscall.SysProcAttr{
 		Cloneflags: syscall.CLONE_NEWUTS | syscall.CLONE_NEWPID | syscall.CLONE_NEWNS | syscall.CLONE_NEWNET | syscall.CLONE_NEWIPC,
@@ -64,6 +67,21 @@ func Run(command string, tty bool, cg *cgroups.CgroupManger, rootPath string, vo
 
 	if err := cmd.Start(); err != nil {
 		log.Fatalln("Run cmd.Start error", err)
+	}
+
+	if nw != "" {
+		// config container network
+		network.Init()
+		containerInfo := &container.ContainerInfo{
+			Id:          id,
+			Pid:         strconv.Itoa(cmd.Process.Pid),
+			Name:        containerName,
+			PortMapping: portMapping,
+		}
+		if err := network.Connect(nw, containerInfo); err != nil {
+			log.Printf("Error Connect Network %v", err)
+			return
+		}
 	}
 
 	log.Infof("before process pid:%d, memory limit: %s", cmd.Process.Pid, cg.SubsystemsIns)

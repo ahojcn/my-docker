@@ -2,6 +2,7 @@ package command
 
 import (
 	log "github.com/Sirupsen/logrus"
+	"mydocker/container"
 	"strconv"
 	"syscall"
 )
@@ -26,7 +27,7 @@ func Stop(containerName string) {
 		log.Errorf("Stop container %s error : %v", containerName, err)
 		return
 	}
-	containerInfo.Status = STOP
+	containerInfo.Status = container.STOP
 	containerInfo.Pid = ""
 	log.Infoln(containerName, "已停止")
 	UpdateContainerInfo(containerInfo)
