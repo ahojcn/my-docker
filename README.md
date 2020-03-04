@@ -1,3 +1,12 @@
+<<<<<<< HEAD
+branch 25:
+
+在 branch24 的基础上，实现容器的网络并测试。
+
+---
+
+EOF
+=======
 # my-docker
 
 @a:<ahojcn@gmail.com>
@@ -277,3 +286,4 @@ tags:
 ---
 
 EOF.
+>>>>>>> c66c859454d3c0542e2d13fc80fa1e711bd10008
