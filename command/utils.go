@@ -68,7 +68,7 @@ func GetContainerInfo(name string) (*container.ContainerInfo, error) {
 	containerInfo := &container.ContainerInfo{}
 	data, err := ioutil.ReadFile(file)
 	if err != nil {
-		return nil, fmt.Errorf("read data %s error: %s\n", data, err)
+		return nil, fmt.Errorf("read data %s error: %s", data, err)
 	}
 	json.Unmarshal(data, containerInfo)
 	return containerInfo, nil

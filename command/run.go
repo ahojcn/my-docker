@@ -4,8 +4,8 @@ import (
 	"fmt"
 	log "github.com/Sirupsen/logrus"
 	"mydocker/cgroups"
-	"mydocker/container"
-	"mydocker/network"
+	//"mydocker/container"
+	//"mydocker/network"
 	"os"
 	"os/exec"
 	"strconv"
@@ -69,7 +69,7 @@ func Run(command string, tty bool, cg *cgroups.CgroupManger, rootPath string, vo
 		log.Fatalln("Run cmd.Start error", err)
 	}
 
-	if nw != "" {
+	/*if nw != "" {
 		// config container network
 		network.Init()
 		containerInfo := &container.ContainerInfo{
@@ -82,7 +82,7 @@ func Run(command string, tty bool, cg *cgroups.CgroupManger, rootPath string, vo
 			log.Printf("Error Connect Network %v", err)
 			return
 		}
-	}
+	}*/
 
 	log.Infof("before process pid:%d, memory limit: %s", cmd.Process.Pid, cg.SubsystemsIns)
 

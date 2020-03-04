@@ -21,7 +21,7 @@ func main() {
 		command.LogCommand,
 		command.ExecCommand,
 		command.StopCommand,
-		command.RemoveCommand,
+		// command.RemoveCommand,
 		command.CopyCommand,
 		command.NetworkCommand,
 	}
