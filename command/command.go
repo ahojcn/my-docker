@@ -134,6 +134,18 @@ var RemoveCommand = cli.Command{
 	},
 }
 
+var CopyCommand = cli.Command{
+	Name: "cp",
+	Usage: "copy files",
+	Action: func(c *cli.Context) error {
+		src := c.Args().Get(0)
+		dst := c.Args().Get(1)
+		log.Infof("src: %s, dst: %s", src, dst)
+		Copy(src, dst)
+		return nil
+	},
+}
+
 var InitCommand = cli.Command{
 	Name: "init",
 	Flags: []cli.Flag{
