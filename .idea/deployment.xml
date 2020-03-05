@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="PublishConfigData" autoUpload="Always" serverName="Huaweiyun" uploadOnCheckin="6bd4a7ad-4f4a-48a5-bb81-f60e4f77cd9d">
+    <serverData>
+      <paths name="Huaweiyun">
+        <serverdata>
+          <mappings>
+            <mapping deploy="/home/ahojcn/my-docker" local="$PROJECT_DIR$" web="/" />
+          </mappings>
+        </serverdata>
+      </paths>
+    </serverData>
+    <option name="myUploadOnCheckinName" value="Huaweiyun" />
+    <option name="myAutoUpload" value="ALWAYS" />
+  </component>
+</project>
